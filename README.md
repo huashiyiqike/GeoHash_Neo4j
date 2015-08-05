@@ -1,5 +1,6 @@
 #neo4j_trie_plugin
-The original [Neo4j Spatial plugin] for Neo4j Graph database uses RTree for geometry calculation,which is not scalable 
+The original [Neo4j Spatial plugin] for Neo4j Graph database uses RTree for geometry calculation,
+which is not scalable 
 for hanlding large number of Nodes for frequent time consuming splitting and joining operations.
  
 Geohash on the other 
@@ -35,4 +36,4 @@ For Plugin Test, run SpatialPluginFunctionTest.
 
 
 [Neo4j Spatial plugin]: https://github.com/neo4j-contrib/spatial
-[geohash-java] https://github.com/kungfoo/geohash-java
+[geohash-java]: https://github.com/kungfoo/geohash-java
