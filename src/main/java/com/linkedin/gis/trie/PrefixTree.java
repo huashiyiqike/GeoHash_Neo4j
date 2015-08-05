@@ -8,7 +8,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.index.IndexHits;
 
 /**
- * Created by lvqi on 7/13/15.
+ * Created by lvqi on 7/13/15.(qiluy.pub@gmail.com)
  */
 class PrefixTreeLabel implements Label{
     String name;
@@ -63,7 +63,6 @@ public class PrefixTree {
 
     public static Node getOrCreateRoot(String label, GraphDatabaseService db){
         String query = "MATCH (n:"+label+") WHERE (n.PrefixTreeRoot) = \"root\"  RETURN n";
-        //String query = "MATCH (n:"+label+") match (n:PrefixTreeRoot) RETURN n";
         Result result = db.execute(query);
         Node root = null;
         if( result.hasNext() )
@@ -99,13 +98,10 @@ public class PrefixTree {
         return depth;
     }
 
-    // distance in km not sure with the distance
-    // https://en.wikipedia.org/wiki/Geohash
     public static List<Node> withinDistance(Node root, final Double lon, final Double lat, double distance){
         int depth = distance_to_depth(distance);
 
         String[] arounds = GeoHash.getNeighboor(lon, lat, depth);
-       // for(String i: arounds)  System.out.println(i);
         List<Node> res = new ArrayList<>();
         for(String prefix:arounds){
             List<Node> tmpres = getChild(prefix, root,depth);
@@ -121,8 +117,6 @@ public class PrefixTree {
             }
         }
 
-      //  long start = System.nanoTime();
-
         List<node_dis> rescompound = new ArrayList<>();
         for(int i = 0; i < res.size(); i++){
             double tmpdis = CalDistance.calculateDistance(lon, lat, res.get(i));
@@ -130,12 +124,6 @@ public class PrefixTree {
                 rescompound.add(new node_dis(res.get(i), tmpdis));
             }
         }
-
-//        long end = System.nanoTime() ;
-//        System.out.println(" dis time " + (end - start) /1e6+ " mili seconds");
-
-       // start = System.nanoTime();
-
         Collections.sort(rescompound, new Comparator<node_dis>() {
             @Override
             public int compare(node_dis o1, node_dis o2) {
@@ -145,11 +133,6 @@ public class PrefixTree {
             }
         });
 
-//        end = System.nanoTime() ;
-//        System.out.println(" sort time " + (end - start) / 1e6 + " mili seconds");
-
-
-
         res.clear();
         for(int i = 0; i < rescompound.size(); i++){
             res.add(rescompound.get(i).node);
@@ -157,19 +140,6 @@ public class PrefixTree {
         return res;
     }
 
-//        Collections.sort(res, new Comparator<Node>() {
-//            @Override
-//            public int compare(Node o1, Node o2) {
-//                Double dis1 = CalDistance.calculateDistance(lon, lat, o1);
-//                Double dis2 = CalDistance.calculateDistance(lon, lat, o2);
-//                if (dis1 < dis2) return -1;
-//                else if (dis1 > dis2) return 1;
-//                return 0;
-//            }
-//        });
-//        return res;
-//        //return getLessThanDistance(lon, lat, res, distance);
-//    }
     
     public static List<Node> getLessThanDistance(double lon, double lat, List<Node> nodes, double distance) {
     	int curPos = 0;
@@ -214,8 +184,9 @@ public class PrefixTree {
 
         for(;level < Math.min(depth, max_level ); level++) {
             RelationshipType relation = char_relation_map.get(hasharray[level]);
-            if (cur.hasRelationship(relation)) {
-                cur = cur.getSingleRelationship(relation, Direction.OUTGOING).getEndNode();
+            if (relation != null && cur.hasRelationship(relation)) {
+                Relationship tmprelation = cur.getSingleRelationship(relation, Direction.OUTGOING);
+                if(tmprelation != null) cur = tmprelation.getEndNode();
             } else {
                 return null; // TODO check this
             }
@@ -276,21 +247,14 @@ public class PrefixTree {
             for (int level = 0; level < max_level; level++) {
                 RelationshipType relation = char_relation_map.get(hasharray[level]);
                 if (cur.hasRelationship(relation, Direction.OUTGOING)) {
-                    // System.out.println(cur.getRelationships(relation));
                     cur = cur.getSingleRelationship(relation, Direction.OUTGOING).getEndNode();
                 } else {
                     Node newnode = db.createNode();
                     cur.createRelationshipTo(newnode, relation);
                     cur = newnode;
-//                    tx.success();
                 }
             }
             cur.createRelationshipTo(node, CharRelation.IN_PREFIXTREE);
-//        }catch(Exception e){
-//            System.out.println(e);
-//        }finally {
-//            tx.close();
-//        }
     }
 
     public static void deleteNode(Node node){
@@ -301,7 +265,6 @@ public class PrefixTree {
          deleteNode(node);
          node.setProperty(LayerNodeIndex.LON_PROPERTY_KEY, lon);
          node.setProperty(LayerNodeIndex.LAT_PROPERTY_KEY, lat);
-        // node.setProperty("geohash", GeoHash.getHash(lon, lat));
          addNode(db, root, node);
     }
 }
