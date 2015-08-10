@@ -9,7 +9,7 @@ in Neo4j.
 
 This project implement Geohash algorithm based on Neo4j graph database, with a specially designed trie 
 tree structure for fast and efficient retrieval. The Geohash implementation is borrowed from [geohash-java] and 
-the project is licensed under LGPL license.
+the project is licensed under LGPL license. For commercial usage, contact Dong bin at Linkedin, China(dongbin.cn at gmail.com).
 
 
 Install & Config
